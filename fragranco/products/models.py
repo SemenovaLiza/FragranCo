@@ -30,6 +30,7 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
 
 
+# change sellers to seller
 class Product(models.Model):
     name = models.CharField(max_length=64)
     description = models.TextField()
