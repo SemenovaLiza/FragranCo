@@ -1,13 +1,17 @@
-from rest_framework import viewsets
+from rest_framework import views, viewsets
 from djoser.views import UserViewSet
 
 from users.models import CustomUser
-from products.models import Company, Category, Product
-
+from products.models import (
+    Company, Category,
+    Product,
+)
 from .serializers import (
     CustomUserSerializer, CompanySerializer,
     CategorySerializer, ProductSerializer,
+    ShoppingCartSerializer,
 )
+from .mixins import PostDeleteMixin
 
 
 class CustomUserViewSet(UserViewSet):
@@ -28,3 +32,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+class ShoppingCartView(PostDeleteMixin, views.APIView):
+    obj_to_add_model = Product
+    serializer_class = ShoppingCartSerializer

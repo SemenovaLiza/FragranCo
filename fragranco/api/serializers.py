@@ -2,7 +2,7 @@ from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
 
 from users.models import CustomUser
-from products.models import Company, Category, Product
+from products.models import Company, Category, Product, ShoppingCart, ShoppingCartItem
 
 
 class CustomUserSerializer(UserSerializer):
@@ -44,3 +44,9 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('name', 'description', 'price', 'sellers', 'category',)
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = ('user', 'product')
