@@ -37,32 +37,62 @@ class CompanySerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('name', 'temporarity',)
+        fields = ('id', 'name', 'temporarity',)
 
 
 class CategoryProductSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all()
+    )
     name = serializers.ReadOnlyField(source='category.name')
+
     class Meta:
         model = CategoryProduct
-        fields = ('name',)
+        fields = ('id', 'name',)
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ListProductSerializer(serializers.ModelSerializer):
+    category = CategoryProductSerializer(many=True, source='companies_in_product')
+
+    class Meta:
+        model = Product
+        fields = ('name', 'description', 'price', 'sellers', 'category')
+
+        def get_category(self, obj):
+            categories = CategoryProduct.objects.filter(product=obj.id)
+            print(obj.id)
+            print(categories)
+            return CategoryProductSerializer(categories, many=True).data
+
+
+class CategoryProductSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all()
+    )
+    name = serializers.ReadOnlyField(source='category.name')
+
+    class Meta:
+        model = CategoryProduct
+        fields = ('id', 'name',)
+
+
+class CreateProductSerializer(serializers.ModelSerializer):
     category = CategoryProductSerializer(many=True)
 
     class Meta:
         model = Product
         fields = ('name', 'description', 'price', 'sellers', 'category',)
 
-    
     def create(self, validated_data):
         categories = validated_data.pop('category')
         product = Product.objects.create(**validated_data)
         for category in categories:
-            current_category, status = Category.objects.get_or_create(**category)
-            CategoryProduct.objects.create(product=product, category=current_category)
-
+            CategoryProduct.objects.create(product=product, category=category.pop('id'))
+            cat = CategoryProduct.objects.filter(product=product.id)
+        product.category.set(categories)
         return product
+
+    #def to_representation(self, value):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):

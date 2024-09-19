@@ -74,7 +74,7 @@ class CompanyProduct(models.Model):
         Product,
         on_delete=models.CASCADE,
         related_name='companies_in_product',
-        verbose_name='Product'
+        verbose_name='Product',
     )
     company = models.ForeignKey(
         Company,

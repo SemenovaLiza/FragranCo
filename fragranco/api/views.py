@@ -8,8 +8,8 @@ from products.models import (
 )
 from .serializers import (
     CustomUserSerializer, CompanySerializer,
-    CategorySerializer, ProductSerializer,
-    ShoppingCartSerializer,
+    CategorySerializer, ListProductSerializer,
+    CreateProductSerializer, ShoppingCartSerializer,
 )
 from .mixins import PostDeleteMixin
 
@@ -31,7 +31,11 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CreateProductSerializer
+        return ListProductSerializer
 
 
 class ShoppingCartView(PostDeleteMixin, views.APIView):
