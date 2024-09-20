@@ -2,7 +2,7 @@ from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
 
 from users.models import CustomUser
-from products.models import Company, Category, Product, ShoppingCart, ShoppingCartItem, CategoryProduct
+from products.models import Company, Category, Product, ShoppingCart, ShoppingCartItem
 
 
 class CustomUserSerializer(UserSerializer):
@@ -40,56 +40,28 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'temporarity',)
 
 
-class CategoryProductSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all()
-    )
-    name = serializers.ReadOnlyField(source='category.name')
-
-    class Meta:
-        model = CategoryProduct
-        fields = ('id', 'name',)
-
-
 class ListProductSerializer(serializers.ModelSerializer):
-    category = CategoryProductSerializer(many=True, source='companies_in_product')
+   # category = CategoryProductSerializer(many=True, source='companies_in_product')
 
     class Meta:
         model = Product
-        fields = ('name', 'description', 'price', 'sellers', 'category')
+        fields = ('name', 'description', 'sellers', 'category')
 
-        def get_category(self, obj):
-            categories = CategoryProduct.objects.filter(product=obj.id)
-            print(obj.id)
-            print(categories)
-            return CategoryProductSerializer(categories, many=True).data
-
-
-class CategoryProductSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all()
-    )
-    name = serializers.ReadOnlyField(source='category.name')
-
-    class Meta:
-        model = CategoryProduct
-        fields = ('id', 'name',)
+        # def get_category(self, obj):
+        #     return CategoryProductSerializer(categories, many=True).data
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
-    category = CategoryProductSerializer(many=True)
+    category = serializers.PrimaryKeyRelatedField(many=True, queryset=Category.objects.all())
 
     class Meta:
         model = Product
-        fields = ('name', 'description', 'price', 'sellers', 'category',)
+        fields = ('name', 'description', 'sellers', 'category',)
 
     def create(self, validated_data):
         categories = validated_data.pop('category')
         product = Product.objects.create(**validated_data)
-        for category in categories:
-            CategoryProduct.objects.create(product=product, category=category.pop('id'))
-            cat = CategoryProduct.objects.filter(product=product.id)
-        product.category.set(categories)
+        product.category.add(*categories)
         return product
 
     #def to_representation(self, value):

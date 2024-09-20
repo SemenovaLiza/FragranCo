@@ -1,11 +1,6 @@
 from django.contrib import admin
 
-from .models import Product, Company, CompanyProduct, Category, CategoryProduct
-
-
-class CategoryInLine(admin.TabularInline):
-    model = CategoryProduct
-    rows = 4
+from .models import Product, Company, CompanyProduct, Category
 
 
 class CompanyInLine(admin.TabularInline):
@@ -15,10 +10,9 @@ class CompanyInLine(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price',)
+    list_display = ('name',)
     search_fields = ('name',)
-    list_filter = ('name', 'price', 'category',)
-    inlines = (CategoryInLine,)
+    list_filter = ('name', 'category',)
 
 
 @admin.register(Company)
