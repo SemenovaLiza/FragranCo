@@ -25,6 +25,9 @@ class Category(models.Model):
     # If category was created for certain event like Christmas or Helloween
     # it will be marked like "temporary category".
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'

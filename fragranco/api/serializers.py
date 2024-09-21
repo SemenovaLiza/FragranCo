@@ -41,13 +41,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ListProductSerializer(serializers.ModelSerializer):
-    #category = CategorySerializer(many=True)
+    category = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Product
         fields = ('name', 'description', 'sellers', 'category')
-        depth = 1
-
 
         # def get_category(self, obj):
         #     return CategoryProductSerializer(categories, many=True).data
@@ -69,7 +67,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return ListProductSerializer(
-            instance, context={'request': self.context.get('request')}
+            instance
         ).data
 
 
