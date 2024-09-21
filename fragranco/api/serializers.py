@@ -41,11 +41,13 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ListProductSerializer(serializers.ModelSerializer):
-   # category = CategoryProductSerializer(many=True, source='companies_in_product')
+    #category = CategorySerializer(many=True)
 
     class Meta:
         model = Product
         fields = ('name', 'description', 'sellers', 'category')
+        depth = 1
+
 
         # def get_category(self, obj):
         #     return CategoryProductSerializer(categories, many=True).data
@@ -57,6 +59,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('name', 'description', 'sellers', 'category',)
+        depth = 1
 
     def create(self, validated_data):
         categories = validated_data.pop('category')
@@ -64,7 +67,10 @@ class CreateProductSerializer(serializers.ModelSerializer):
         product.category.add(*categories)
         return product
 
-    #def to_representation(self, value):
+    def to_representation(self, instance):
+        return ListProductSerializer(
+            instance, context={'request': self.context.get('request')}
+        ).data
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
