@@ -2,7 +2,10 @@ from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
 
 from users.models import CustomUser
-from products.models import Company, Category, Product, ShoppingCart, ShoppingCartItem
+from products.models import (
+    Company, CompanyProduct, Category,
+    Product, ShoppingCart, ShoppingCartItem
+)
 
 
 class CustomUserSerializer(UserSerializer):
@@ -29,9 +32,24 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
+    owner = serializers.PrimaryKeyRelatedField(
+        queryset=CustomUser.objects.all()
+    )
+
     class Meta:
         model = Company
         fields = ('name', 'owner', 'foundation_date',)
+
+
+class CompanyProductSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all()
+    )
+    company_name = serializers.ReadOnlyField(source='company.name')
+
+    class Meta:
+        model = CompanyProduct
+        fields = ('id', 'company_name', 'price')  # add amount of product left
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -42,26 +60,29 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ListProductSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(many=True)
+    sellers = CompanyProductSerializer(many=True)
 
     class Meta:
         model = Product
         fields = ('name', 'description', 'sellers', 'category')
 
-        # def get_category(self, obj):
-        #     return CategoryProductSerializer(categories, many=True).data
-
 
 class CreateProductSerializer(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(many=True, queryset=Category.objects.all())
+    category = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Category.objects.all()
+    )
+    sellers = CompanyProductSerializer(many=True)
 
     class Meta:
         model = Product
         fields = ('name', 'description', 'sellers', 'category',)
-        depth = 1
 
     def create(self, validated_data):
         categories = validated_data.pop('category')
+        sellers = validated_data.pop('sellers')
         product = Product.objects.create(**validated_data)
+        for seller in sellers:
+            CompanyProduct.objects.create(product=product, company=seller['id'], price=seller['price'])
         product.category.add(*categories)
         return product
 

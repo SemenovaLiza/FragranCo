@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from users.models import CustomUser
 
 
+# unique name
 class Company(models.Model):
     name = models.CharField(max_length=64)
     owner = models.ForeignKey(
@@ -66,6 +67,10 @@ class CompanyProduct(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Company'
     )
+    price = models.IntegerField(validators=[MinValueValidator(1)], default=1)
+
+    def __str__(self):
+        return self.company.name, self.price
 
 
 class ShoppingCart(models.Model):
