@@ -41,9 +41,16 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = ('name', 'owner', 'foundation_date',)
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id', 'name', 'temporarity',)
+
+
 class CompanyProductSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
-        queryset=Company.objects.all()
+        queryset=Company.objects.all(),
+        write_only=True
     )
     company_name = serializers.ReadOnlyField(source='company.name')
 
@@ -52,19 +59,28 @@ class CompanyProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'company_name', 'price')  # add amount of product left
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class RetrieveProductSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField(many=True)
+    sellers = CompanyProductSerializer(many=True, source='companies_in_product')
+
     class Meta:
-        model = Category
-        fields = ('id', 'name', 'temporarity',)
+        model = Product
+        fields = ('id', 'name', 'description', 'sellers', 'category')
 
 
 class ListProductSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(many=True)
-    sellers = CompanyProductSerializer(many=True)
+    price = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ('name', 'description', 'sellers', 'category')
+        fields = ('id', 'name', 'category', 'price')
+
+    def get_price(self, obj):
+        prices = []
+        for i in CompanyProduct.objects.filter(product=obj.id):
+            prices.append(i.price)
+        return min(prices)
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
@@ -76,6 +92,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('name', 'description', 'sellers', 'category',)
+        depth = 1
 
     def create(self, validated_data):
         categories = validated_data.pop('category')
