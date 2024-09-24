@@ -110,6 +110,13 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = ShoppingCart
         fields = ('user', 'product')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['user'] = instance.user.username
+        representation['product'] = ListProductSerializer(instance.product).data
+        return representation
