@@ -81,22 +81,21 @@ class ShoppingCart(models.Model):
         related_name='User',
         verbose_name='Cart'
     )
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name='product',
-        verbose_name='Product'
-    )
 
 
 class ShoppingCartItem(models.Model):
     cart = models.ForeignKey(
         ShoppingCart,
-        on_delete=models.CASCADE,
-        verbose_name='Cart to add product to'
+        related_name='items',
+        on_delete=models.CASCADE
     )
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
         verbose_name='Product in cart'
+    )
+    seller = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        verbose_name='Seller of the product'
     )

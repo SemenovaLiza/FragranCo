@@ -83,6 +83,12 @@ class ListProductSerializer(serializers.ModelSerializer):
         return min(prices)
 
 
+class ShortProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'description', 'category', )
+
+
 class CreateProductSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Category.objects.all()
@@ -110,13 +116,6 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = ShoppingCart
-        fields = ('user', 'product')
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['user'] = instance.user.username
-        representation['product'] = ListProductSerializer(instance.product).data
-        return representation
+        fields = ('user',)
