@@ -78,7 +78,7 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='User',
+        related_name='cart',
         verbose_name='Cart'
     )
 

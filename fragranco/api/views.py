@@ -1,6 +1,6 @@
 from rest_framework import views, viewsets
 from rest_framework.decorators import api_view  # Импортировали декоратор
-from rest_framework.response import Response 
+from rest_framework.response import Response
 from djoser.views import UserViewSet
 
 from users.models import CustomUser
@@ -12,7 +12,7 @@ from .serializers import (
     CustomUserSerializer, CompanySerializer,
     CategorySerializer, ListProductSerializer,
     CreateProductSerializer, ShoppingCartSerializer,
-    RetrieveProductSerializer,
+    RetrieveProductSerializer, ShoppingCartItemSerializer
 )
 from .mixins import PostDeleteMixin
 
@@ -43,13 +43,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         return ListProductSerializer
 
 
-# class ShoppingCartView(PostDeleteMixin, views.APIView):
-#     obj_to_add_model = Product
-#     serializer_class = TotalShoppingCart
+class ShoppingCartView(PostDeleteMixin, views.APIView):
+    obj_to_add_model = Product
+    serializer_class = ShoppingCartItemSerializer
 
 
 @api_view(['GET',])
 def get_shopping_cart(request):
-    shopping_cart = ShoppingCart.objects.filter(user=request.user.id)
+    shopping_cart = ShoppingCart.objects.get_or_create(user=request.user.id)
     serializer = ShoppingCartSerializer(shopping_cart)
     return Response(serializer.data)

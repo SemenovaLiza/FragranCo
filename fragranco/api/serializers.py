@@ -116,6 +116,14 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = ShoppingCart
-        fields = ('user',)
+        fields = ('id', 'user',)
+
+
+class ShoppingCartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCartItem
+        fields = ('cart', 'product', 'seller')
