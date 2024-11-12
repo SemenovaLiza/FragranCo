@@ -71,31 +71,3 @@ class CompanyProduct(models.Model):
 
     def __str__(self):
         return self.company.name, self.price
-
-
-class ShoppingCart(models.Model):
-    "User's cart."
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='cart',
-        verbose_name='Cart'
-    )
-
-
-class ShoppingCartItem(models.Model):
-    cart = models.ForeignKey(
-        ShoppingCart,
-        related_name='items',
-        on_delete=models.CASCADE
-    )
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        verbose_name='Product in cart'
-    )
-    seller = models.ForeignKey(
-        Company,
-        on_delete=models.CASCADE,
-        verbose_name='Seller of the product'
-    )

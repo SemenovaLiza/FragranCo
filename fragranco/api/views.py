@@ -6,13 +6,13 @@ from djoser.views import UserViewSet
 from users.models import CustomUser
 from products.models import (
     Company, Category,
-    Product, ShoppingCart
+    Product
 )
 from .serializers import (
     CustomUserSerializer, CompanySerializer,
     CategorySerializer, ListProductSerializer,
-    CreateProductSerializer, ShoppingCartSerializer,
-    RetrieveProductSerializer, ShoppingCartItemSerializer
+    CreateProductSerializer,
+    RetrieveProductSerializer
 )
 from .mixins import PostDeleteMixin
 
@@ -41,15 +41,3 @@ class ProductViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             return RetrieveProductSerializer
         return ListProductSerializer
-
-
-class ShoppingCartView(PostDeleteMixin, views.APIView):
-    obj_to_add_model = Product
-    serializer_class = ShoppingCartItemSerializer
-
-
-@api_view(['GET',])
-def get_shopping_cart(request):
-    shopping_cart = ShoppingCart.objects.get_or_create(user=request.user.id)
-    serializer = ShoppingCartSerializer(shopping_cart)
-    return Response(serializer.data)

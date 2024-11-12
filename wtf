@@ -1,0 +1,6 @@
+{
+    "name": "Weasley Cream",
+    "description": "samoye interesnoe",
+    "category": [1, 3],
+    "sellers": [{"id": 1, "price": 150}, {"id": 2, "price": 90}, {"id": 3, "price": 112}]
+}
