@@ -71,3 +71,18 @@ class CompanyProduct(models.Model):
 
     def __str__(self):
         return self.company.name, self.price
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        related_name='cart',
+        on_delete=models.CASCADE,
+        verbose_name='shopping cart'
+    )
+    product = models.ForeignKey(
+        Product,
+        related_name='product_in_carts',
+        on_delete=models.CASCADE,
+        verbose_name='products in shopping cart'
+    )

@@ -6,13 +6,14 @@ from djoser.views import UserViewSet
 from users.models import CustomUser
 from products.models import (
     Company, Category,
-    Product
+    Product, ShoppingCart,
 )
 from .serializers import (
     CustomUserSerializer, CompanySerializer,
     CategorySerializer, ListProductSerializer,
     CreateProductSerializer,
-    RetrieveProductSerializer
+    RetrieveProductSerializer,
+    ShoppingCartSerializer,
 )
 from .mixins import PostDeleteMixin
 
@@ -30,6 +31,11 @@ class CompanyViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+
+class ShoppingCartViewSet(viewsets.ModelViewSet):
+    queryset = ShoppingCart.objects.all()
+    serializer_class = ShoppingCartSerializer
 
 
 class ProductViewSet(viewsets.ModelViewSet):

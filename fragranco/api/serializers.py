@@ -4,7 +4,7 @@ from djoser.serializers import UserSerializer, UserCreateSerializer
 from users.models import CustomUser
 from products.models import (
     Company, CompanyProduct, Category,
-    Product
+    Product, ShoppingCart,
 )
 
 
@@ -113,3 +113,9 @@ class CreateProductSerializer(serializers.ModelSerializer):
         return ListProductSerializer(
             instance
         ).data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = ('user', 'product',)
