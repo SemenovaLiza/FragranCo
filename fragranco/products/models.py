@@ -73,16 +73,30 @@ class CompanyProduct(models.Model):
         return self.company.name, self.price
 
 
-class ShoppingCart(models.Model):
+class Item(models.Model):
     user = models.ForeignKey(
         CustomUser,
-        related_name='cart',
+        related_name='items',
         on_delete=models.CASCADE,
         verbose_name='shopping cart'
     )
     product = models.ForeignKey(
         Product,
-        related_name='product_in_carts',
+        related_name='product_in_carts_item',
         on_delete=models.CASCADE,
-        verbose_name='products in shopping cart'
+        verbose_name='products in carts item'
+    )
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        related_name='cartt',
+        on_delete=models.CASCADE,
+        verbose_name='shopping cart'
+    )
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        verbose_name='items in shopping cart'
     )
