@@ -8,11 +8,11 @@ class PostDeleteMixin:
     permission_classes = [IsAuthenticated, ]
     obj_to_add_model = None
     serializer_class = None
-    object_to_add_name = 'product'
+    object_to_add_name = None
 
     def post(self, request, id):
         obj_to_add = get_object_or_404(
-            self.obj_to_add_model, pk=id
+            self.obj_to_add_model, pk=id  # Product id
         )
         data = {
             self.object_to_add_name: obj_to_add.id,

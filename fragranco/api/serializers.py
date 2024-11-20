@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
 
@@ -128,7 +129,25 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'item',)
 
 
+class ItemShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ('product',)
+
+
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ('id', 'user', 'product',)
+
+
+class ListItemSerializer(serializers.ModelSerializer):
+    items = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Item
+        fields = ('id', 'user', 'items',)
+
+    def get_items(self, obj):
+        items = Item.objects.filter(user=obj.user.id)
+        return ItemShortSerializer(items, many=True).data
