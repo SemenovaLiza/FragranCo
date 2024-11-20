@@ -150,4 +150,4 @@ class ListItemSerializer(serializers.ModelSerializer):
 
     def get_items(self, obj):
         items = Item.objects.filter(user=obj.user.id)
-        return ItemShortSerializer(items, many=True).data
+        return ItemSerializer(items, many=True).data

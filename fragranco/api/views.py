@@ -56,6 +56,6 @@ class ItemView(PostDeleteMixin, views.APIView):
 
 class ListItemView(ListModelMixin, GenericAPIView):
     def get(self, request):
-        items = Item.objects.all()
+        items = Item.objects.filter(user=request.user.id)
         serializer = ListItemSerializer(items, many=True)
         return Response(serializer.data)
