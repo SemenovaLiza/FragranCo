@@ -18,6 +18,6 @@ router.register('products', ProductViewSet, basename='products')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('products/<int:id>/add-itennm/', ItemView.as_view(), name='add_item'),
+    path('products/<int:id>/add-item/', ItemView.as_view(), name='add_item'),
     path('cart/', ListItemView.as_view(), name='cart'),
 ]

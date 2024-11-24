@@ -130,9 +130,15 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 class ItemShortSerializer(serializers.ModelSerializer):
+    amount = serializers.SerializerMethodField()
+
     class Meta:
         model = Item
-        fields = ('product',)
+        fields = ('id', 'product', 'amount',)
+
+    def get_amount(self, obj):
+        amount = Item.objects.filter(user=obj.user.id, product=obj.product.id).count()
+        return amount
 
 
 class ItemSerializer(serializers.ModelSerializer):
@@ -145,9 +151,9 @@ class ListItemSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
 
     class Meta:
-        model = Item
-        fields = ('id', 'user', 'items',)
+        model = CustomUser
+        fields = ('id', 'items',)
 
     def get_items(self, obj):
-        items = Item.objects.filter(user=obj.user.id)
-        return ItemSerializer(items, many=True).data
+        items = Item.objects.filter(user=obj.id)
+        return ItemShortSerializer(items, many=True).data
