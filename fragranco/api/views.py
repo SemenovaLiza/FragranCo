@@ -8,7 +8,7 @@ from rest_framework.mixins import ListModelMixin
 from users.models import CustomUser
 from products.models import (
     Company, Category,
-    Product, Item, Cart,
+    Product, Item,
 )
 from .serializers import (
     CustomUserSerializer, CompanySerializer,

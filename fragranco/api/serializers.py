@@ -5,7 +5,7 @@ from djoser.serializers import UserSerializer, UserCreateSerializer
 from users.models import CustomUser
 from products.models import (
     Company, CompanyProduct, Category,
-    Product, Item, Cart
+    Product, Item,
 )
 
 
@@ -116,35 +116,24 @@ class CreateProductSerializer(serializers.ModelSerializer):
         ).data
 
 
-class BigCart(serializers.Serializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all()
-    )
-    items = ListProductSerializer(read_only=True, many=True)
-
-
-class CartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cart
-        fields = ('id', 'user', 'item',)
-
-
 class ItemShortSerializer(serializers.ModelSerializer):
-    amount = serializers.SerializerMethodField()
-
     class Meta:
         model = Item
         fields = ('id', 'product', 'amount',)
-
-    def get_amount(self, obj):
-        amount = Item.objects.filter(user=obj.user.id, product=obj.product.id).count()
-        return amount
 
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ('id', 'user', 'product',)
+        fields = ('id', 'user', 'product', 'amount',)
+
+    def create(self, validated_data):
+        if Item.objects.filter(user=validated_data['user'], product=validated_data['product']).exists():
+            item = Item.objects.get(user=validated_data['user'], product=validated_data['product'])
+            item.amount += 1
+            item.save()
+            return item
+        return super().create(validated_data)
 
 
 class ListItemSerializer(serializers.ModelSerializer):

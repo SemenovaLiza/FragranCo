@@ -82,21 +82,8 @@ class Item(models.Model):
     )
     product = models.ForeignKey(
         Product,
-        related_name='product_in_carts_item',
+        related_name='product_in_carts_item', #чтобы высчитать популярность продукта  добавить поле со стаутсом купила/нет и так проверять попоулярность продукта
         on_delete=models.CASCADE,
         verbose_name='products in carts item'
     )
-
-
-class Cart(models.Model):
-    user = models.ForeignKey(
-        CustomUser,
-        related_name='cartt',
-        on_delete=models.CASCADE,
-        verbose_name='shopping cart'
-    )
-    item = models.ForeignKey(
-        Item,
-        on_delete=models.CASCADE,
-        verbose_name='items in shopping cart'
-    )
+    amount = models.PositiveSmallIntegerField(default=1)

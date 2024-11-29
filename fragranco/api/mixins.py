@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from products.models import Item
 
 
 class PostDeleteMixin:
@@ -27,4 +28,13 @@ class PostDeleteMixin:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
-        pass
+        obj_to_delete = get_object_or_404(
+            self.obj_to_add_model, pk=id  # Product id
+        )
+        data = {
+            self.object_to_add_name: obj_to_delete.id,
+            'user': request.user.id
+        }
+        data = Item.objects.filter(**data)
+        data.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
