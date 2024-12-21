@@ -89,7 +89,7 @@ class ShortProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id', 'name', 'description', 'category', )
 
-
+# checking
 class CreateProductSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Category.objects.all()
