@@ -1,4 +1,4 @@
-from rest_framework import views, viewsets
+from rest_framework import views, viewsets, generics
 from rest_framework.decorators import api_view  # Импортировали декоратор
 from rest_framework.response import Response
 from djoser.views import UserViewSet
@@ -8,15 +8,18 @@ from rest_framework.mixins import ListModelMixin
 from users.models import CustomUser
 from products.models import (
     Company, Category,
-    Product, Item,
+    Product, Item, Review,
 )
 from .serializers import (
     CustomUserSerializer, CompanySerializer,
-    CategorySerializer, ListProductSerializer,
+    ListProductSerializer,
     CreateProductSerializer,
     RetrieveProductSerializer,
     ItemSerializer,
     ListItemSerializer,
+    CategorySerializer,
+    ReviewSerializer,
+    ListReviewSerializer,
 )
 from .mixins import PostDeleteMixin
 
@@ -59,3 +62,17 @@ class ListItemView(ListModelMixin, GenericAPIView):
         user = CustomUser.objects.filter(id=request.user.id)
         serializer = ListItemSerializer(user, many=True)
         return Response(serializer.data)
+
+
+class ReviewCreate(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return ListReviewSerializer
+        return ReviewSerializer
+    
+
+class ReviewDelete(generics.DestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer

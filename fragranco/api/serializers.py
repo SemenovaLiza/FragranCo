@@ -1,12 +1,23 @@
-from django.shortcuts import get_object_or_404
+import base64
 from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
+from django.core.files.base import ContentFile
 
 from users.models import CustomUser
 from products.models import (
     Company, CompanyProduct, Category,
-    Product, Item,
+    Product, Item, Review,
 )
+
+
+# data:image/png;base64,'<data>'
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        return super().to_internal_value(data)
 
 
 class CustomUserSerializer(UserSerializer):
@@ -43,9 +54,14 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    number_of_products = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ('id', 'name', 'temporarity',)
+        fields = ('id', 'name', 'temporarity', 'number_of_products',)
+
+    def get_number_of_products(self, obj):
+        return Product.objects.filter(category=obj).count()
 
 
 class CompanyProductSerializer(serializers.ModelSerializer):
@@ -62,7 +78,8 @@ class CompanyProductSerializer(serializers.ModelSerializer):
 
 class RetrieveProductSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(many=True)
-    sellers = CompanyProductSerializer(many=True, source='companies_in_product')
+    sellers = CompanyProductSerializer(
+        many=True, source='companies_in_product')
 
     class Meta:
         model = Product
@@ -87,9 +104,9 @@ class ListProductSerializer(serializers.ModelSerializer):
 class ShortProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id', 'name', 'description', 'category', )
+        fields = ('id', 'name',)
 
-# checking
+
 class CreateProductSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Category.objects.all()
@@ -106,7 +123,9 @@ class CreateProductSerializer(serializers.ModelSerializer):
         sellers = validated_data.pop('sellers')
         product = Product.objects.create(**validated_data)
         for seller in sellers:
-            CompanyProduct.objects.create(product=product, company=seller['id'], price=seller['price'])
+            CompanyProduct.objects.create(
+                product=product, company=seller['id'], price=seller['price']
+            )
         product.category.add(*categories)
         return product
 
@@ -128,8 +147,12 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'product', 'amount',)
 
     def create(self, validated_data):
-        if Item.objects.filter(user=validated_data['user'], product=validated_data['product']).exists():
-            item = Item.objects.get(user=validated_data['user'], product=validated_data['product'])
+        if Item.objects.filter(
+            user=validated_data['user'], product=validated_data['product']
+        ).exists():
+            item = Item.objects.get(
+                user=validated_data['user'], product=validated_data['product']
+            )
             item.amount += 1
             item.save()
             return item
@@ -146,3 +169,42 @@ class ListItemSerializer(serializers.ModelSerializer):
     def get_items(self, obj):
         items = Item.objects.filter(user=obj.id)
         return ItemShortSerializer(items, many=True).data
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'rating', 'image',)
+
+    def create(self, validated_data):
+        product_id = self.context['request'].parser_context['kwargs']['id']
+        product = Product.objects.get(id=product_id)
+        user = self.context['request'].user
+        review = Review.objects.create(**validated_data, product=product, user=user)
+        return review
+
+
+class ListReviewSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(required=False, allow_null=True)
+    product = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = ('id', 'product', 'user', 'text', 'rating', 'image',)
+
+    def get_product(self, obj):
+        data = {
+            'id': obj.product.id,
+            'name': obj.product.name,
+        }
+        return data
+
+    def get_user(self, obj):
+        data = {
+            'id': obj.user.id,
+            'username': obj.user.username,
+        }
+        return data

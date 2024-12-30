@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from users.models import CustomUser
 
@@ -87,3 +87,24 @@ class Item(models.Model):
         verbose_name='products in carts item'
     )
     amount = models.PositiveSmallIntegerField(default=1)
+
+
+class Review(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        related_name='reviews',
+        on_delete=models.CASCADE,
+        verbose_name='review author'
+    )
+    product = models.ForeignKey(
+        Product,
+        related_name='reviews',
+        on_delete=models.CASCADE,
+        verbose_name='product'
+    )
+    created_at = models.DateTimeField(auto_now=True)
+    text = models.TextField()
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    photo = models.ImageField(upload_to='reviews/images/', null=True, default=None)

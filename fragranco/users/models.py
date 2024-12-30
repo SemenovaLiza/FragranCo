@@ -45,5 +45,5 @@ class CustomUser(AbstractUser):
                 fields=['email', 'username'],
                 name='unique_username_email'
             ),
-            
+
         ]
