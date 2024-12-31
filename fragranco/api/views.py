@@ -71,8 +71,17 @@ class ReviewCreate(generics.ListCreateAPIView):
         if self.request.method == 'GET':
             return ListReviewSerializer
         return ReviewSerializer
-    
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        print(self.request)
+
 
 class ReviewDelete(generics.DestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+
+class ReviewList(generics.ListAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ListReviewSerializer

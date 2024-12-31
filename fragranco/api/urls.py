@@ -5,7 +5,7 @@ from .views import (
     CustomUserViewSet, CompanyViewSet,
     CategoryViewSet, ProductViewSet,
     ItemView, ListItemView, ReviewCreate,
-    ReviewDelete,
+    ReviewDelete, ReviewList,
 )
 
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('products/<int:id>/add-item/', ItemView.as_view(), name='add_item'),
     path('products/<int:id>/add-review/', ReviewCreate.as_view(), name='add-review'),
-    path('products/<int:id>/reviews/<int:pk>/', ReviewDelete.as_view(), name='delete-review'),
+    path('products/<int:id>/reviews/', ReviewList.as_view(), name='reviews'),
+    path('products/<int:product_id>/reviews/<int:pk>/', ReviewDelete.as_view(), name='delete-review'),
     path('cart/', ListItemView.as_view(), name='cart'),
 ]

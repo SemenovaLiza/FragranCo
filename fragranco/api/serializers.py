@@ -1,5 +1,5 @@
 import base64
-from rest_framework import serializers
+from rest_framework import serializers, validators
 from djoser.serializers import UserSerializer, UserCreateSerializer
 from django.core.files.base import ContentFile
 
@@ -181,8 +181,14 @@ class ReviewSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         product_id = self.context['request'].parser_context['kwargs']['id']
         product = Product.objects.get(id=product_id)
-        user = self.context['request'].user
-        review = Review.objects.create(**validated_data, product=product, user=user)
+        review = Review.objects.create(**validated_data, product=product)
+        return review
+
+    def delete(self, validated_data):
+        product_id = self.context['request'].parser_context['kwargs']['product_id']
+        review_id = self.context['request'].parser_context['kwargs']['id']
+        review = Review.objects.get(id=review_id, product=product_id)
+        review.delete()
         return review
 
 
