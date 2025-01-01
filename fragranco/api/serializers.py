@@ -179,9 +179,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'rating', 'image',)
 
     def create(self, validated_data):
-        product_id = self.context['request'].parser_context['kwargs']['id']
+        product_id = self.context['request'].parser_context['kwargs']['product_id']
+        user = self.context['request'].user
         product = Product.objects.get(id=product_id)
-        review = Review.objects.create(**validated_data, product=product)
+        review = Review.objects.create(**validated_data, product=product, user=user)
         return review
 
     def delete(self, validated_data):

@@ -1,9 +1,10 @@
-from rest_framework import views, viewsets, generics
+from rest_framework import views, viewsets, generics, status
 from rest_framework.decorators import api_view  # Импортировали декоратор
 from rest_framework.response import Response
 from djoser.views import UserViewSet
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
+from django.shortcuts import get_object_or_404
 
 from users.models import CustomUser
 from products.models import (
@@ -64,6 +65,7 @@ class ListItemView(ListModelMixin, GenericAPIView):
         return Response(serializer.data)
 
 
+####
 class ReviewCreate(generics.ListCreateAPIView):
     queryset = Review.objects.all()
 
@@ -85,3 +87,36 @@ class ReviewDelete(generics.DestroyAPIView):
 class ReviewList(generics.ListAPIView):
     queryset = Review.objects.all()
     serializer_class = ListReviewSerializer
+###
+
+
+class APIReviewListCreate(views.APIView):
+    def get(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        reviews = Review.objects.filter(product=product)
+        serializer = ListReviewSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, product_id):
+        serializer = ReviewSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class APIReviewDetails(views.APIView):
+    def delete(self, request, product_id, id):
+        product = get_object_or_404(Product, id=product_id)
+        review = get_object_or_404(Review, id=id, product=product)
+        review.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, product_id, id):
+        product = get_object_or_404(Product, id=product_id)
+        review = get_object_or_404(Review, id=id, product=product)
+        serializer = ReviewSerializer(review, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
